@@ -108,7 +108,12 @@ async def process() -> None:
             await run_tasks(tg_clients=tg_clients)
         else:
             tg_clients = await get_tg_clients()
-            proxies = get_proxies()
+            #proxies = get_proxies()
+            if settings.USE_PROXY_FROM_FILE:
+                with open(file="bot/config/proxies_main.txt", encoding="utf-8-sig") as file:
+                    proxies = [Proxy.from_str(proxy=row.strip()).as_url for row in file]
+            else:
+                proxies = []
             await run_tapper1(tg_clients=tg_clients, proxies=proxies)
     elif action == 3:
         ans = None
