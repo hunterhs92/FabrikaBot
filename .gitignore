@@ -1,0 +1,5 @@
+/config/*.txt
+.env
+data.txt
+README.md
+/sessions
