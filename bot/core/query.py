@@ -3,6 +3,7 @@ import random
 import traceback
 from itertools import cycle
 from time import time
+import html
 
 import aiohttp
 import requests
@@ -83,7 +84,7 @@ class Tapper:
             res.raise_for_status()
         except:
             logger.error(
-                f"{self.session_name} | <red>Unknown error while trying to skip onboarding... {res.text}</red>")
+                f"{self.session_name} | <red>Unknown error while trying to skip onboarding... {html.escape(res.text)}</red>")
 
     async def get_user_info(self, session: requests.Session):
         res = session.get("https://api.ffabrika.com/api/v1/profile")
@@ -108,7 +109,7 @@ class Tapper:
             else:
                 self.user_data = user_data['data']
         else:
-            logger.warning(f"{self.session_name} | Can't get user info: {res.text}")
+            logger.warning(f"{self.session_name} | Can't get user info: {html.escape(res.text)}")
 
     def join_squad(self, session: requests.Session):
         sid = settings.SQUAD_ID
@@ -116,7 +117,7 @@ class Tapper:
         if res.status_code == 204 or res.status_code == 401:
             return res.status_code
         else:
-            logger.warning(f"{self.session_name} | <yellow>Failed to join squad: {res.text}</yellow>")
+            logger.warning(f"{self.session_name} | <yellow>Failed to join squad: {html.escape(res.text)}</yellow>")
 
     def do_task(self, session: requests.Session, task_id, task_des):
         res = session.post(f"https://api.ffabrika.com/api/v1/tasks/completion/{task_id}")
@@ -128,7 +129,7 @@ class Tapper:
             self.refresh_token(session)
             self.do_task(session, task_id, task_des)
         else:
-            logger.warning(f"{self.session_name} | <yellow>Failed to do task {task_des}: {res.text}</yellow>")
+            logger.warning(f"{self.session_name} | <yellow>Failed to do task {task_des}: {html.escape(res.text)}</yellow>")
 
     def need_to_work(self, session: requests.Session):
         res = session.get(f"https://api.ffabrika.com/api/v1/factories/{self.factory_id}/workers?page=1")
@@ -192,7 +193,7 @@ class Tapper:
             self.refresh_token(session)
             self.fetch_tasks(session)
         else:
-            logger.warning(f"{self.session_name} | <yellow>Failed to fetch tasks: {res.text}</yellow>")
+            logger.warning(f"{self.session_name} | <yellow>Failed to fetch tasks: {html.escape(res.text)}</yellow>")
             return []
 
     def tap(self, session: requests.Session, tap_count: int):
@@ -210,7 +211,7 @@ class Tapper:
             self.refresh_token(session)
             self.tap(session, tap_count)
         else:
-            #logger.warning(f"{self.session_name} | <yellow>Failed to tap: {res.text}</yellow>")
+            #logger.warning(f"{self.session_name} | <yellow>Failed to tap: {html.escape(res.text)}</yellow>")
             logger.warning(f"{self.session_name} | <yellow>Failed to tap</yellow>")
 
     def boost_energy(self, session: requests.Session):
@@ -226,7 +227,7 @@ class Tapper:
             self.refresh_token(session)
             self.boost_energy(session)
         else:
-            logger.warning(f"{self.session_name} | <yellow>Failed to boost energy: {res.text}</yellow>")
+            logger.warning(f"{self.session_name} | <yellow>Failed to boost energy: {html.escape(res.text)}</yellow>")
         return False
 
     def check_time(self, available_time):
@@ -246,7 +247,7 @@ class Tapper:
             self.refresh_token(session)
             self.get_factory_info(session)
         else:
-            logger.warning(f"{self.session_name} | <yellow>Failed to get factory info: {res.text}</yellow>")
+            logger.warning(f"{self.session_name} | <yellow>Failed to get factory info: {html.escape(res.text)}</yellow>")
             return None
 
     def purchase(self, session: requests.Session, worker_id):
@@ -254,7 +255,7 @@ class Tapper:
         if res.status_code == 204:
             return True
         else:
-            logger.info(f"{self.session_name} | <yellow>Failed to purchase worker {worker_id}: {res.text}</yellow>")
+            logger.info(f"{self.session_name} | <yellow>Failed to purchase worker {worker_id}: {html.escape(res.text)}</yellow>")
             return False
 
     def get_score(self, session):
@@ -300,7 +301,7 @@ class Tapper:
         if res.status_code == 204:
             logger.success(f"{self.session_name} | <green>Successfully sent all worker to work!</green>")
         else:
-            logger.warning(f"{self.session_name} | <yellow>Failed to send worker to work: {res.text}</yellow>")
+            logger.warning(f"{self.session_name} | <yellow>Failed to send worker to work: {html.escape(res.text)}</yellow>")
 
     def refresh_token(self, session: requests.Session):
         headers['Cookie'] = f"ref_uid={self.refresh_token}"
@@ -314,7 +315,7 @@ class Tapper:
             self.refresh_token_ = data_['refreshToken']['value']
             logger.success(f"{self.session_name} | <green>Refresh token successfully !</green>")
         else:
-            logger.warning(f"{self.session_name} | <yellow>Failed to refresh token:</yellow> {res.text}")
+            logger.warning(f"{self.session_name} | <yellow>Failed to refresh token:</yellow> {html.escape(res.text)}")
 
     async def run(self, proxy: str | None) -> None:
         access_token_created_time = 0
@@ -386,7 +387,7 @@ class Tapper:
                                 await asyncio.sleep(random.uniform(2, 5))
                         else:
                             logger.warning(
-                                f"{self.session_name} <yellow>Failed to claim daily reward: {res.text}</yellow>")
+                                f"{self.session_name} <yellow>Failed to claim daily reward: {html.escape(res.text)}</yellow>")
 
                     if squad == "No squad":
                         res_code = self.join_squad(session)
